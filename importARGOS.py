@@ -29,8 +29,8 @@ arcpy.AddField_management(outputFC,"TagID","LONG")
 arcpy.AddField_management(outputFC,"LC","TEXT")
 arcpy.AddField_management(outputFC,"Date","DATE")
 
-#Create Insert Cursor
-cur = arcpy.da.InsertCursor(outputFC, ['SHAPE@', 'TagID', 'LC', 'Date'])
+# Create the insert cursor
+cur = arcpy.da.InsertCursor(outputFC,['Shape@','TagID','LC','Date'])
 
 #Iterate through files in folder
 for inputFile in os.listdir(inputFolder):
@@ -95,6 +95,13 @@ for inputFile in os.listdir(inputFolder):
                 obsPoint.X = obsLon
                 obsPoint.Y = obsLat
 
+                # Convert the point to a point geometry object with spatial reference
+                inputSR = arcpy.SpatialReference(4326)
+                obsPointGeom = arcpy.PointGeometry(obsPoint,inputSR)
+
+                # Create a feature object
+                feature = cur.insertRow((obsPointGeom,tagID,obsLC,obsDate.replace(".","/") + " " + obsTime))
+
             #Handle any error
             except Exception as e:
                 print(f"Error adding record {tagID} to the output: {e}")
@@ -106,3 +113,6 @@ for inputFile in os.listdir(inputFolder):
         
     #Close the file object
     inputFileObj.close()
+
+#delete cursor
+del cur 
