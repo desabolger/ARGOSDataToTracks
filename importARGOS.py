@@ -29,6 +29,9 @@ arcpy.AddField_management(outputFC,"TagID","LONG")
 arcpy.AddField_management(outputFC,"LC","TEXT")
 arcpy.AddField_management(outputFC,"Date","DATE")
 
+#Create Insert Cursor
+cur = arcpy.da.InsertCursor(outputFC, ['SHAPE@', 'TagID', 'LC', 'Date'])
+
 # Construct a while loop and iterate through all lines in the data file
 # Open the ARGOS data file
 inputFileObj = open(inputFile,'r')
@@ -57,15 +60,41 @@ while lineString:
         # Extract the date we need to variables
         obsLat = line2Data[2]
         obsLon= line2Data[5]
-                    
-        # Extract the date, time, and LC values
+        
+        #Extract Date, Time LC values
         obsDate = lineData[3]
         obsTime = lineData[4]
-        obsLC   = lineData[7]
+        obsLC = lineData[7]
         
         # Print results to see how we're doing
-        print (tagID,"Lat:"+obsLat,"Long:"+obsLon, obsLC, obsDate, obsTime)
-        
+     #   print (tagID,"Lat:"+obsLat,"Long:"+obsLon, "Date:"+obsDate, "Time:"+obsTime, "LC:"+obsLC)
+
+
+        #try some code:
+        try:
+            print (tagID,"Lat:"+obsLat,"Long:"+obsLon, "Date:"+obsDate, "Time:"+obsTime, "LC:"+obsLC)
+
+             # Convert raw coordinate strings to numbers
+            if obsLat[-1] == 'N':
+                obsLat = float(obsLat[:-1])
+            else:
+                obsLat = float(obsLat[:-1]) * -1
+            if obsLon[-1] == 'E':
+                obsLon = float(obsLon[:-1])
+            else:
+                obsLon = float(obsLon[:-1]) * -1
+
+            # Construct a point object from the feature class
+            obsPoint = arcpy.Point()
+            obsPoint.X = obsLon
+            obsPoint.Y = obsLat
+
+          #Handle any error
+        except Exception as e:
+            print(f"Error adding record {tagID} to the output: {e}")
+
+
+       
     # Move to the next line so the while loop progresses
     lineString = inputFileObj.readline()
     
