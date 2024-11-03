@@ -23,7 +23,11 @@ outputSR = arcpy.SpatialReference(54002)
 # Create an empty feature class; requires the path and name as separate parameters
 outPath,outName = os.path.split(outputFC)
 arcpy.CreateFeatureclass_management(outPath,outName,"POINT","","","",outputSR)
-arcpy.CreateFeatureclass_management(outPath, outName)
+
+# Add TagID, LC, IQ, and Date fields to the output feature class
+arcpy.AddField_management(outputFC,"TagID","LONG")
+arcpy.AddField_management(outputFC,"LC","TEXT")
+arcpy.AddField_management(outputFC,"Date","DATE")
 
 # Construct a while loop and iterate through all lines in the data file
 # Open the ARGOS data file
